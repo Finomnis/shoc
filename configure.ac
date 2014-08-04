@@ -374,6 +374,132 @@ AS_IF([test "x$with_mpi" != xno],
 )
 AM_CONDITIONAL([BUILD_MPI], [test "x$with_mpi" = "xyes"])
 
+
+####################################################################
+# HPX Configuration
+
+AC_LANG_PUSH([C++])
+
+# get hpx path from command line argument
+AC_ARG_WITH([hpx], [AS_HELP_STRING([--with-hpx],
+            [enables HPX and sets the HPX directory])], [HPXPATHSET=1], [HPXPATHSET=0])
+    
+if test "x$HPXPATHSET" = "x1"; then
+
+    # test for a working c++11 compiler
+    #AX_CXX_COMPILE_STDCXX_11(noext, optional)
+    
+    
+    #if test "x$HAVE_CXX11" = "x1"; then
+
+        #HPX_INCLUDE_FLAGS="-I$with_hpx/include -I$with_hpx/include/hpx/external $BOOST_CPPFLAGS"
+        #HPX_LINK_FLAGS="-L$with_hpx/lib/hpx $BOOST_LDFLAGS"
+        
+        if test "x$debug" = "xno"
+        then
+            # Release libs
+            HPX_LIBS=""
+            HPX_INCLUDE_FLAGS=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$with_hpx/lib/pkgconfig pkg-config --cflags hpx_application`
+            HPX_LINK_FLAGS=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$with_hpx/lib/pkgconfig pkg-config --libs hpx_application`
+        else
+            # Debug libs
+            HPX_LIBS=""
+            HPX_INCLUDE_FLAGS=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$with_hpx/lib/pkgconfig pkg-config --cflags hpx_application_debug`
+            HPX_LINK_FLAGS=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$with_hpx/lib/pkgconfig pkg-config --libs hpx_application_debug`
+        fi
+        
+        HPX_INCLUDE_FLAGS="$HPX_INCLUDE_FLAGS -DUSE_HPX" 
+        
+        # add hpx to flags for test compilation
+        old_CXXFLAGS=$CXXFLAGS
+        old_LDFLAGS=$LDFLAGS
+        old_LIBS=$LIBS
+        CXXFLAGS="$HPX_INCLUDE_FLAGS"
+        LDFLAGS=""
+        LIBS="$HPX_LINK_FLAGS $HPX_LIBS"
+        
+        
+        HPX_TESTSRC="#include<hpx/hpx_init.hpp>
+                     int hpx_main(int argc, char** argv)
+                     {
+                         return hpx::finalize();
+                     }
+                     int main(int argc, char** argv)
+                     {
+                         return hpx::init(argc, argv);
+                     }"
+        
+        # check for hpx library headers   
+        AC_MSG_CHECKING([for the HPX library headers])
+        # try to compile a file that includes a header of the library HPX
+        AC_COMPILE_IFELSE([[ #include<hpx/hpx_init.hpp> ]],
+            [AC_MSG_RESULT([found])
+                AC_MSG_CHECKING([whether the HPX library can be linked])
+                AC_LINK_IFELSE(
+                    [AC_LANG_SOURCE([[$HPX_TESTSRC]])],
+                    [AC_MSG_RESULT([yes])
+                        AC_MSG_CHECKING([whether the resulting HPX binary can be executed])
+                        if ./conftest$EXEEXT 2>&5 >&5; then
+                            AC_MSG_RESULT([yes])
+                            FOUND_HPX=1
+                        else
+                            AC_MSG_RESULT([no])
+                            FOUND_HPX=0
+                        fi],
+                    [AC_MSG_RESULT([no])
+                        FOUND_HPX=0;])],
+            [AC_MSG_RESULT([not found])
+                FOUND_HPX=0;])
+        
+        # restore old flags
+        CXXFLAGS=$old_CXXFLAGS
+        LDFLAGS=$old_LDFLAGS
+        LIBS=$old_LIBS
+        
+        
+        if test "$FOUND_HPX" != "1"; then
+                AC_MSG_NOTICE([])
+                AC_MSG_NOTICE([The HPX library was not found!])
+            if test "$HPXPATHSET" = "1" ; then
+                AC_MSG_NOTICE([ The install prefix '$with_hpx' for the HPX library was set.])
+                AC_MSG_NOTICE([ --> Maybe wrong ???])
+                if test "x$debug" = "xno"; then
+                    AC_MSG_NOTICE([ --> Also make sure HPX is built in RELEASE mode.])
+                else
+                    AC_MSG_NOTICE([ --> Also make sure HPX is built in DEBUG mode.])
+                fi
+            else
+                AC_MSG_NOTICE([ No non-standard install prefix was set.])
+                AC_MSG_NOTICE([ --> You might want to use '--with-hpx=PREFIX' ?!?])
+            fi
+            AC_MSG_NOTICE([])
+            AC_MSG_ERROR([ Unable to add HPX. ])
+        fi
+    
+        AC_SUBST(HPX_INCLUDE_FLAGS)
+        AC_SUBST(HPX_LINK_FLAGS)
+        AC_SUBST(HPX_LIBS)
+        
+        CXXFLAGS="$HPX_INCLUDE_FLAGS"
+        LDFLAGS=""
+        LIBS="$HPX_LINK_FLAGS $HPX_LIBS"
+    
+        AC_DEFINE([BUILD_HPX], [], [Defined when HPX is found])
+
+    #else
+    #    AC_MSG_ERROR([Unable to add HPX, compiler does not support C++11!])
+    #fi
+
+fi
+
+AM_CONDITIONAL([BUILD_HPX], [test "x$with_hpx" = "xyes"])
+
+AC_LANG_POP([C++])
+
+#
+###################################################################
+
+
 AC_SUBST([USE_MPI])
 AC_SUBST([MPICXX])
 AC_SUBST([USE_CUDA])

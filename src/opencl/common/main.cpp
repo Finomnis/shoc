@@ -25,6 +25,9 @@
 #include <NodeInfo.h>
 #endif
 
+#ifdef USE_HPX
+#include <hpx/hpx_init.hpp>
+#endif
 
 using namespace std;
 using namespace SHOC;
@@ -70,7 +73,11 @@ void RunBenchmark(cl_device_id devID,
 //   Also detect and print outliers from parallel runs.
 //
 // ****************************************************************************
+#ifdef USE_HPX
+int hpx_main(int argc, char *argv[])
+#else
 int main(int argc, char *argv[])
+#endif
 {
     int ret = 0;
 
@@ -108,6 +115,9 @@ int main(int argc, char *argv[])
 #else
             op.usage();
 #endif
+#ifdef USE_HPX
+            hpx::finalize();
+#endif // USE_HPX
             return (op.HelpRequested() ? 0 : 1 );
         }
 
@@ -154,6 +164,9 @@ int main(int argc, char *argv[])
             mnc1.Print (cout);
 #endif  // DEBUG
 #endif  // PARALLEL
+#ifdef USE_HPX
+            hpx::finalize();
+#endif // USE_HPX
             return (0);
         }
 
@@ -249,5 +262,21 @@ int main(int argc, char *argv[])
     MPI_Finalize();
 #endif
 
+#ifdef USE_HPX
+    // Shut down HPX
+    hpx::finalize();
+#endif    
+
     return ret;
 }
+
+#ifdef USE_HPX
+int main(int argc, char *argv[])
+{
+    std::vector<std::string> cfg;
+    cfg.push_back("hpx.commandline.aliasing=0"); // disable aliasing
+    cfg.push_back("hpx.commandline.allow_unknown=1"); // allow for unknown options
+
+    return hpx::init(argc, argv, cfg);
+}
+#endif
