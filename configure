@@ -6300,18 +6300,10 @@ if test "x$HPXPATHSET" = "x1"; then
         #HPX_INCLUDE_FLAGS="-I$with_hpx/include -I$with_hpx/include/hpx/external $BOOST_CPPFLAGS"
         #HPX_LINK_FLAGS="-L$with_hpx/lib/hpx $BOOST_LDFLAGS"
 
-        if test "x$debug" = "xno"
-        then
-            # Release libs
-            HPX_LIBS=""
-            HPX_INCLUDE_FLAGS=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$with_hpx/lib/pkgconfig pkg-config --cflags hpx_application`
-            HPX_LINK_FLAGS=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$with_hpx/lib/pkgconfig pkg-config --libs hpx_application`
-        else
-            # Debug libs
-            HPX_LIBS=""
-            HPX_INCLUDE_FLAGS=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$with_hpx/lib/pkgconfig pkg-config --cflags hpx_application_debug`
-            HPX_LINK_FLAGS=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$with_hpx/lib/pkgconfig pkg-config --libs hpx_application_debug`
-        fi
+        # Release libs. SHOC does not support a debug build.
+        HPX_LIBS=""
+        HPX_INCLUDE_FLAGS=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$with_hpx/lib/pkgconfig pkg-config --cflags hpx_application`
+        HPX_LINK_FLAGS=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$with_hpx/lib/pkgconfig pkg-config --libs hpx_application`
 
         HPX_INCLUDE_FLAGS="$HPX_INCLUDE_FLAGS -DUSE_HPX"
 
@@ -6395,13 +6387,8 @@ $as_echo "$as_me: The HPX library was not found!" >&6;}
 $as_echo "$as_me:  The install prefix '$with_hpx' for the HPX library was set." >&6;}
                 { $as_echo "$as_me:${as_lineno-$LINENO}:  --> Maybe wrong ???" >&5
 $as_echo "$as_me:  --> Maybe wrong ???" >&6;}
-                if test "x$debug" = "xno"; then
-                    { $as_echo "$as_me:${as_lineno-$LINENO}:  --> Also make sure HPX is built in RELEASE mode." >&5
+                { $as_echo "$as_me:${as_lineno-$LINENO}:  --> Also make sure HPX is built in RELEASE mode." >&5
 $as_echo "$as_me:  --> Also make sure HPX is built in RELEASE mode." >&6;}
-                else
-                    { $as_echo "$as_me:${as_lineno-$LINENO}:  --> Also make sure HPX is built in DEBUG mode." >&5
-$as_echo "$as_me:  --> Also make sure HPX is built in DEBUG mode." >&6;}
-                fi
             else
                 { $as_echo "$as_me:${as_lineno-$LINENO}:  No non-standard install prefix was set." >&5
 $as_echo "$as_me:  No non-standard install prefix was set." >&6;}

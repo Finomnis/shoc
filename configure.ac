@@ -395,18 +395,10 @@ if test "x$HPXPATHSET" = "x1"; then
         #HPX_INCLUDE_FLAGS="-I$with_hpx/include -I$with_hpx/include/hpx/external $BOOST_CPPFLAGS"
         #HPX_LINK_FLAGS="-L$with_hpx/lib/hpx $BOOST_LDFLAGS"
         
-        if test "x$debug" = "xno"
-        then
-            # Release libs
-            HPX_LIBS=""
-            HPX_INCLUDE_FLAGS=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$with_hpx/lib/pkgconfig pkg-config --cflags hpx_application`
-            HPX_LINK_FLAGS=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$with_hpx/lib/pkgconfig pkg-config --libs hpx_application`
-        else
-            # Debug libs
-            HPX_LIBS=""
-            HPX_INCLUDE_FLAGS=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$with_hpx/lib/pkgconfig pkg-config --cflags hpx_application_debug`
-            HPX_LINK_FLAGS=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$with_hpx/lib/pkgconfig pkg-config --libs hpx_application_debug`
-        fi
+        # Release libs. SHOC does not support a debug build.
+        HPX_LIBS=""
+        HPX_INCLUDE_FLAGS=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$with_hpx/lib/pkgconfig pkg-config --cflags hpx_application`
+        HPX_LINK_FLAGS=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$with_hpx/lib/pkgconfig pkg-config --libs hpx_application`
         
         HPX_INCLUDE_FLAGS="$HPX_INCLUDE_FLAGS -DUSE_HPX" 
         
@@ -463,11 +455,7 @@ if test "x$HPXPATHSET" = "x1"; then
             if test "$HPXPATHSET" = "1" ; then
                 AC_MSG_NOTICE([ The install prefix '$with_hpx' for the HPX library was set.])
                 AC_MSG_NOTICE([ --> Maybe wrong ???])
-                if test "x$debug" = "xno"; then
-                    AC_MSG_NOTICE([ --> Also make sure HPX is built in RELEASE mode.])
-                else
-                    AC_MSG_NOTICE([ --> Also make sure HPX is built in DEBUG mode.])
-                fi
+                AC_MSG_NOTICE([ --> Also make sure HPX is built in RELEASE mode.])
             else
                 AC_MSG_NOTICE([ No non-standard install prefix was set.])
                 AC_MSG_NOTICE([ --> You might want to use '--with-hpx=PREFIX' ?!?])
