@@ -274,6 +274,11 @@ int main(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
     std::vector<std::string> cfg;
+    
+    // by default, use all available threads
+    cfg.push_back("hpx.os_threads=all");
+
+    // enable shoc command line arguments
     cfg.push_back("hpx.commandline.aliasing=0"); // disable aliasing
     cfg.push_back("hpx.commandline.allow_unknown=1"); // allow for unknown options
 
